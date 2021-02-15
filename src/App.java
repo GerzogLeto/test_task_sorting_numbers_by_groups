@@ -11,6 +11,7 @@ public class App {
     static int badStringCount = 0;
     static int correctStringCount = 0;
     static int allStringAtGroups = 0;
+    static int AllStringAtGroupsMoreThanOne = 0;
     static int counterGroups = 0;
     static TreeSet<Structure> first = new TreeSet<>(new CoordComp());
     static TreeSet<Structure> second = new TreeSet<>(new CoordComp());
@@ -27,12 +28,12 @@ public class App {
             Group group = new Group();
             Set<Integer> strings = new HashSet<>();
             if(arrString[i] == -1 && arrString[i+1] == -1 && arrString[i+2] == -1){
-                strings.add(i);
-                group.strings.add(strings);
-                group.size = strings.size();
-                if(!(groups.add(group))){
-                    groups.ceiling(group).strings.add(strings);
-                }
+//                strings.add(i);
+//                group.strings.add(strings);
+//                group.size = strings.size();
+//                if(!(groups.add(group))){
+//                    groups.ceiling(group).strings.add(strings);
+//                }
                 continue;
             }
             int tempSize = strings.size();
@@ -43,6 +44,17 @@ public class App {
                 tempSize = strings.size();
                 adding(strings);
             }
+            if(strings.size() == 0)continue;
+            if(strings.size() > 1){
+                List<Integer> temp = new ArrayList<>();
+                delDubl1(strings, temp);
+                if(!(temp.isEmpty())){
+                    temp.remove(0);
+                }
+                for (Integer integer : temp) {
+                    strings.remove(integer);
+                }
+            }
             group.strings.add(strings);
             group.size = strings.size();
             if(!(groups.add(group))){
@@ -50,12 +62,14 @@ public class App {
             }
         }
 
-        allStringAtGroups = countStringToGroup(groups);
+
+        AllStringAtGroupsMoreThanOne = countStringToGroup(groups);
 //        printGroups(groups);
         System.out.println("bad strings: " + badStringCount);
         System.out.println("correct strings: " + correctStringCount);
+//        System.out.println("correct strings excluding empty strings like -  \"\";\"\";\"\" : " + allStringAtGroups);
         System.out.println("all  groups with size more than 1 element: " + counterGroups);
-        System.out.println("all strings at groups: " + allStringAtGroups);
+//        System.out.println("all strings at groups with size more than 1 element: : " + AllStringAtGroupsMoreThanOne);
         Long finish = System.currentTimeMillis();
         System.out.println("Time: " + ((finish - start) / 1000));
     }
@@ -126,13 +140,70 @@ public class App {
 
         return i;
     }
+//    public static TreeSet<Group> filterGroup (TreeSet<Group> groups){
+//        TreeSet<Group> set = new TreeSet<>(new GroupComp());
+//        for (Group group : groups) {
+////            for (Set<Integer> string : group.strings) {
+////                allStringAtGroups += string.size();
+////            }
+//            if(group.size > 1){
+//                for (Set<Integer> string : group.strings) {
+//                    List<Integer> temp = new ArrayList<>();
+//                    for (Integer integer : string) {
+//                        delDubl(integer, string, temp);
+//                    }
+//                    if(!(temp.isEmpty())){
+//                        temp.remove(0);
+//                    }
+//                    for (Integer integer : temp) {
+//                        string.remove(integer);
+//                    }
+//                    if(string.size() > 1){
+//                        Group newGroup = new Group();
+//                        newGroup.size = string.size();
+//                        newGroup.strings.add(string);
+//                        if(!(set.add(newGroup))){
+//                            set.ceiling(newGroup).strings.add(string);
+//                        }
+//
+//                    }
+//                }
+//            }
+//        }
+//        return set;
+//    }
 
+    public static void delDubl (int index, Set<Integer> set, List<Integer> temp){
+        for (Integer integer : set) {
+            if(index != integer){
+                if(arrString[index] == arrString[integer] && arrString[index+1] == arrString[integer+1] &&
+                        arrString[index+2] == arrString[integer+2]){
+                    temp.add(index);
+                }
+            }
+        }
+    }
+    public static void delDubl1 (Set<Integer> set, List<Integer> temp){
+        for (Integer integer : set) {
+            for (Integer integer1 : set) {
+                if(integer != integer1){
+                    if(arrString[integer] == arrString[integer1] && arrString[integer+1] == arrString[integer1+1] &&
+                            arrString[integer+2] == arrString[integer1+2]){
+                        temp.add(integer);
+                    }
+                }
+
+            }
+        }
+    }
     public static int countStringToGroup(TreeSet<Group> groups){
         int temp = 0;
         for (Group group : groups) {
-            if(group.size > 1) counterGroups += group.strings.size();
-            for (Set<Integer> string : group.strings) {
-                temp += string.size();
+            if(group.size > 1){
+                counterGroups += group.strings.size();
+//                for (Set<Integer> string : group.strings) {
+//                    temp += string.size();
+//                }
             }
         }
         return  temp;
