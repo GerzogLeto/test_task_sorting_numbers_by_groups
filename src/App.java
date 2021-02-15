@@ -11,22 +11,22 @@ public class App {
     static int badStringCount = 0;
     static int correctStringCount = 0;
     static int allStringAtGroups = 0;
-    static int countGroupWithSizeMoreOne = 0;
+    static int counterGroups = 0;
     static TreeSet<Structure> first = new TreeSet<>(new CoordComp());
     static TreeSet<Structure> second = new TreeSet<>(new CoordComp());
     static TreeSet<Structure> third = new TreeSet<>(new CoordComp());
     static TreeSet<Group> groups = new TreeSet<>(new GroupComp());
-    static Coord[] arrCoord = new Coord[1000100];
+    static long[] arrString = new long[3000300];
 
 
 
     public static void main(String[] args) {
         Long start = System.currentTimeMillis();
         int count = readFileToList(args[0]);
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i += 3) {
             Group group = new Group();
             Set<Integer> strings = new HashSet<>();
-            if(arrCoord[i].getX() == -1 && arrCoord[i].getY() == -1 && arrCoord[i].getZ() == -1){
+            if(arrString[i] == -1 && arrString[i+1] == -1 && arrString[i+2] == -1){
                 strings.add(i);
                 group.strings.add(strings);
                 group.size = strings.size();
@@ -48,21 +48,13 @@ public class App {
             if(!(groups.add(group))){
                 groups.ceiling(group).strings.add(strings);
             }
-//            deleteStrings(strings, 1);
-//            deleteStrings(strings, 2);
-//            deleteStrings(strings, 3);
         }
 
-//        System.out.println("_____________________");
-//        printTreeSets(first);
-//        System.out.println("_____________________");
-//        printTreeSets(second);
-//        System.out.println("_____________________");
-//        printTreeSets(third);
-//        System.out.println("_____________________");
-        printGroups(groups);
+        allStringAtGroups = countStringToGroup(groups);
+//        printGroups(groups);
         System.out.println("bad strings: " + badStringCount);
         System.out.println("correct strings: " + correctStringCount);
+        System.out.println("all  groups with size more than 1 element: " + counterGroups);
         System.out.println("all strings at groups: " + allStringAtGroups);
         Long finish = System.currentTimeMillis();
         System.out.println("Time: " + ((finish - start) / 1000));
@@ -84,65 +76,66 @@ public class App {
                 if (arr.length == 3) {
                     if ((arr[0].matches("\"\\d*\"")) && (arr[1].matches("\"\\d*\"")) &&
                             (arr[2].matches("\"\\d*\""))) {
-
-                        Coord coord = new Coord();
-
                         if (arr[0].matches("\"\"")) {
-                            coord.setX(-1);
-                        }
-                        if (arr[0].matches("\"\\d+\"")) {
-                            String temp = arr[0].substring(1, arr[0].length() - 1);
-                            coord.setX(Long.parseLong(temp));
+                            arrString[i] = -1;
+                        }else{
+                            arrString[i] =  (Long.parseLong(arr[0].substring(1, arr[0].length() - 1)));
                         }
                         if (arr[1].matches("\"\"")) {
-                            coord.setY(-1);
-                        }
-                        if (arr[1].matches("\"\\d+\"")) {
-                            String temp = arr[1].substring(1, arr[1].length() - 1);
-                            coord.setY(Long.parseLong(temp));
+                            arrString[i+1] = -1;
+                        }else{
+                            arrString[i+1] = (Long.parseLong(arr[1].substring(1, arr[1].length() - 1)));
                         }
                         if (arr[2].matches("\"\"")) {
-                            coord.setZ(-1);
-                        }
-                        if (arr[2].matches("\"\\d+\"")) {
-                            String temp = arr[2].substring(1, arr[2].length() - 1);
-                            coord.setZ(Long.parseLong(temp));
+                            arrString[i+2] = -1;
+                        }else{
+                            arrString[i+2] = (Long.parseLong(arr[2].substring(1, arr[2].length() - 1)));
                         }
                         correctStringCount++;
-                        arrCoord[i] = coord;
-                        if (coord.getX() != -1) {
+                        if (arrString[i] != -1) {
                             Structure structure = new Structure();
-                            structure.number = coord.getX();
+                            structure.number = arrString[i];
                             if (!(first.add(structure))) {
                                 first.ceiling(structure).eq.add(i);
                             }
                             first.ceiling(structure).eq.add(i);
 
                         }
-                        if (coord.getY() != -1) {
+                        if (arrString[i+1] != -1) {
                             Structure structure = new Structure();
-                            structure.number = coord.getY();
+                            structure.number = arrString[i+1];
                             if (!(second.add(structure))) {
                                 second.ceiling(structure).eq.add(i);
                             }
                             second.ceiling(structure).eq.add(i);
                         }
-                        if (coord.getZ() != -1) {
+                        if (arrString[i+2] != -1) {
                             Structure structure = new Structure();
-                            structure.number = coord.getZ();
+                            structure.number = arrString[i+2];
                             if (!(third.add(structure))) {
                                 third.ceiling(structure).eq.add(i);
                             }
                             third.ceiling(structure).eq.add(i);
                         }
-                        i++;
                     } else badStringCount++;
 
                 } else badStringCount++;
+            i += 3;
 
             }
 
         return i;
+    }
+
+    public static int countStringToGroup(TreeSet<Group> groups){
+        int temp = 0;
+        for (Group group : groups) {
+            if(group.size > 1) counterGroups += group.strings.size();
+            for (Set<Integer> string : group.strings) {
+                temp += string.size();
+            }
+        }
+        return  temp;
     }
 
     public static void printGroups(TreeSet<Group> groups){
@@ -150,14 +143,12 @@ public class App {
         for (Group group : groups) {
             if(group.size == 0) continue;
             for (Set<Integer> string : group.strings) {
-                if(i==40) return;
-//                if(string.size() == 0) continue;
+                if(i==101) return; //show 100 first groups
                 System.out.println("Group number: " + i);
                 System.out.println("Size of group: " + string.size());
                 for (Integer integer : string) {
-                    allStringAtGroups++;
-                    System.out.println("X= " + arrCoord[integer].getX() + "; Y= " +
-                            arrCoord[integer].getY() + "; Z= " + arrCoord[integer].getZ());
+                    System.out.println("X= " + arrString[integer] + "; Y= " +
+                            arrString[integer+1] + "; Z= " + arrString[integer+2]);
                 }
                 i++;
             }
@@ -165,24 +156,13 @@ public class App {
         System.out.println("All groups: " + (i-1));
     }
 
-    public static  void printTreeSets(TreeSet<Structure> set){
-        for (Structure structure : set) {
-            System.out.println("___________________________");
-            for (Integer integer : structure.eq) {
-                System.out.println("X= " + arrCoord[integer].getX() + "; Y= " +
-                        arrCoord[integer].getY() + "; Z= " + arrCoord[integer].getZ());
-
-            }
-            System.out.println("___________________________");
-        }
-    }
 
     public static Structure getStructure(int index, int rank){
         Structure structure = new Structure();
         structure.index = index;
-        if(rank == 1) structure.number = arrCoord[index].getX();
-        if(rank == 2) structure.number = arrCoord[index].getY();
-        if(rank == 3) structure.number = arrCoord[index].getZ();
+        if(rank == 1) structure.number = arrString[index];
+        if(rank == 2) structure.number = arrString[index+1];
+        if(rank == 3) structure.number = arrString[index+2];
         return structure;
     }
 
